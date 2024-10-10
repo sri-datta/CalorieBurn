@@ -1,2 +1,2 @@
 FROM nginx
-COPY . /usr/share/ngnix/html
+COPY . /usr/share/nginx/html

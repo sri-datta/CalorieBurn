@@ -1,181 +1,97 @@
 :root {
-    --light-blue: #a3daff;
-    --dark-blue: #004f9f;
-    --soft-yellow: #ffd966;
-    --light-green: #93c47d;
-    --dark-yellow: #f4c542;
-    --light-grey: #f5f6f7;
-    --dark-grey: #1b1b32;
-    --shadow: rgba(0, 0, 0, 0.1);
-  }
-  
-  body {
-    font-family: 'Lato', sans-serif;
-    background-color: var(--light-grey);
-    color: var(--dark-grey);
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-  
-  header {
-    width: 100%;
-    background-color: white;
-    box-shadow: 0px 2px 4px var(--shadow);
-    padding: 20px;
-    text-align: center;
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-  }
-  
-  h1 {
-    color: var(--dark-blue);
-    font-size: 2em;
-    margin: 0;
-  }
-  
-  .container {
-    width: 90%;
-    max-width: 600px;
-    margin-top: 40px;
-  }
-  
-  .card {
-    background-color: white;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px var(--shadow);
-    padding: 20px;
-  }
-  
-  .card-group {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-  }
-  
-  .input-group {
-    margin-bottom: 20px;
-  }
-  
-  .input-field {
-    width: 100%;
-    padding: 10px;
-    border-radius: 8px;
-    border: 2px solid var(--dark-blue);
-    font-size: 1em;
-    box-sizing: border-box;
-  }
-  
-  button {
-    border: none;
-    cursor: pointer;
-    padding: 12px;
-    border-radius: 8px;
-    font-size: 1em;
-    font-weight: bold;
-    transition: all 0.3s ease;
-  }
-  
-  .btn {
-    display: inline-block;
-    padding: 12px 24px;
-    margin-top: 10px;
-    border-radius: 8px;
-  }
-  
-  .btn-add {
-    background-color: var(--soft-yellow);
-    color: var(--dark-grey);
-    margin-right: 10px;
-  }
-  
-  .btn-add:hover {
-    background-color: var(--dark-yellow);
-  }
-  
-  .btn-calculate {
-    background-color: var(--light-green);
-    color: white;
-    margin-right: 10px;
-  }
-  
-  .btn-calculate:hover {
-    background-color: var(--dark-blue);
-    color: white;
-  }
-  
-  .btn-clear {
-    background-color: var(--light-blue);
-    color: white;
-  }
-  
-  .btn-clear:hover {
-    background-color: var(--dark-blue);
-  }
-  
-  .button-group {
-    display: flex;
-    justify-content: space-between;
-    gap: 10px;
-    margin-top: 20px;
-  }
-  
-  .output {
-    margin-top: 20px;
-    padding: 15px;
-    border: 2px solid var(--dark-grey);
-    border-radius: 8px;
-    background-color: var(--light-grey);
-    color: var(--dark-grey);
-    font-weight: bold;
-    text-align: center;
-  }
-  
-  .hide {
-    display: none;
-  }
-  
-  fieldset {
-    border: none;
-    padding: 0;
-    margin-bottom: 20px;
-  }
-  
-  legend {
-    font-weight: bold;
-    font-size: 1.2em;
-    color: var(--dark-blue);
-    margin-bottom: 10px;
-  }
-  
-  .input-container {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-  
-  .controls {
-    margin-top: 20px;
-  }
-  
-  select {
-    padding: 10px;
-    border-radius: 8px;
-    border: 2px solid var(--dark-blue);
-    font-size: 1em;
-  }
-  
-  .entry-group {
-    margin-bottom: 20px; /* Adds space between each entry */
-  }
-  
-  .form-control {
-    display: block;
-    width: 100%;
-    padding: 10px;
-    margin-bottom: 10px; /* Adds space between Name and Calories inputs */
-    border-radius: 8px;
-  }
-  
+  --light-blue: #a3daff;
+  --dark-blue: #004f9f;
+  --soft-yellow: #ffd966;
+  --light-green: #93c47d;
+  --dark-yellow: #f4c542;
+  --light-grey: #f5f6f7;
+  --dark-grey: #1b1b32;
+  --shadow: rgba(0, 0, 0, 0.1);
+}
+
+body {
+  font-family: 'Lato', sans-serif;
+  background-color: var(--light-grey);
+  color: var(--dark-grey);
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+header {
+  width: 100%;
+  background: linear-gradient(90deg, var(--light-blue), var(--soft-yellow));
+  box-shadow: 0px 2px 4px var(--shadow);
+  padding: 20px;
+  text-align: center;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+h1 {
+  color: var(--dark-grey);
+  font-size: 2.5em;
+  margin: 0;
+}
+
+.container {
+  width: 90%;
+  max-width: 600px;
+  margin-top: 40px;
+}
+
+.card {
+  background-color: white;
+  border-radius: 15px;
+  box-shadow: 0 4px 10px var(--shadow);
+  padding: 20px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+  transform: scale(1.02);
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+}
+
+button {
+  border: none;
+  cursor: pointer;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 1em;
+  font-weight: bold;
+  transition: all 0.3s ease-in-out;
+}
+
+button:hover {
+  transform: scale(1.05);
+}
+
+.button-group {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.output {
+  margin-top: 20px;
+  padding: 20px;
+  border: 2px solid var(--dark-grey);
+  border-radius: 8px;
+  background: linear-gradient(90deg, var(--light-blue), var(--light-green));
+  color: var(--dark-grey);
+  font-weight: bold;
+  text-align: center;
+  box-shadow: 0 4px 8px var(--shadow);
+}
+
+.input-container {
+  margin-top: 10px;
+}
+
+.hide {
+  display: none;
+}

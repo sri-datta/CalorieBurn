@@ -1,109 +1,160 @@
+// Replace with your Edamam API credentials
+const EDAMAM_APP_ID = "93790d94";
+const EDAMAM_APP_KEY = "0db8c7d577fd508c9f627f137a70fa84";
+
+// Replace with your API Ninjas API key
+const API_NINJAS_API_KEY = "ECVj2r+ArzqnNyB4SXGHQA==GYkv1aAnc9C5CooR";
+
 // DOM Element References
-const calorieCounter = document.getElementById('calorie-counter');
-const budgetNumberInput = document.getElementById('budget');
-const entryDropdown = document.getElementById('entry-dropdown');
-const addEntryButton = document.getElementById('add-entry');
-const clearButton = document.getElementById('clear');
-const output = document.getElementById('output');
+const addEntryButton = document.getElementById("add-entry");
+const entryDropdown = document.getElementById("entry-dropdown");
+const calorieCounter = document.getElementById("calorie-counter");
+const clearButton = document.getElementById("clear");
+const budgetNumberInput = document.getElementById("budget");
+const output = document.getElementById("output");
 
-let isError = false;
-
-// Clears specific entry
-function clearSpecificEntry(entryContainer) {
-    entryContainer.remove();
-}
-
-// Clears the entire form
-function clearForm() {
-    document.querySelectorAll('.input-container').forEach(container => container.innerHTML = "");
-    budgetNumberInput.value = "";
-    output.innerHTML = "";
-    output.classList.add("hide");
-}
-
-// Adds new food or exercise entries dynamically
+// Add a new entry dynamically
 function addEntry() {
-    const targetInputContainer = document.querySelector(`#${entryDropdown.value} .input-container`);
-    const entryNumber = targetInputContainer.querySelectorAll('input[type="text"]').length + 1;
+  const targetInputContainer = document.querySelector(
+    `#${entryDropdown.value} .input-container`
+  );
+  if (!targetInputContainer) {
+    console.error(`Target container not found for: ${entryDropdown.value}`);
+    return;
+  }
 
-    const entryHTML = generateEntryHTML(entryDropdown.value, entryNumber);
-    targetInputContainer.insertAdjacentHTML("beforeend", entryHTML);
+  const entryNumber = targetInputContainer.querySelectorAll(".entry-group").length + 1;
+  const entryHTML = generateEntryHTML(entryDropdown.value, entryNumber);
+  targetInputContainer.insertAdjacentHTML("beforeend", entryHTML);
 
-    // Attach event listener to new clear button
-    const clearButtons = document.querySelectorAll('.clear-entry');
-    clearButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            clearSpecificEntry(this.parentElement);
-        });
-    });
+  const newEntry = targetInputContainer.querySelector(".entry-group:last-child");
+  const foodInput = newEntry.querySelector('input[name="food-name"]');
+  const calorieInput = newEntry.querySelector('input[name="calories"]');
+
+  // Attach event listener to autofill calories for food or exercise
+  foodInput.addEventListener("input", () =>
+    autoFillCalories(foodInput, calorieInput, entryDropdown.value === "exercise")
+  );
 }
 
-// Generates dynamic HTML for new entries
+// Generate dynamic HTML for new entries
 function generateEntryHTML(type, entryNumber) {
-    return `
-        <div class="entry-group">
-            <label for="${type}-${entryNumber}-name">Entry ${entryNumber} Name</label>
-            <input type="text" id="${type}-${entryNumber}-name" placeholder="Name" class="form-control" />
-            <label for="${type}-${entryNumber}-calories">Entry ${entryNumber} Calories</label>
-            <input type="number" id="${type}-${entryNumber}-calories" min="0" placeholder="Calories" class="form-control" />
-            <button type="button" class="clear-entry">Clear Entry</button>
-        </div>`;
+  const isExercise = type === "exercise";
+  return `
+    <div class="entry-group">
+      <label for="${type}-${entryNumber}-name">Entry ${entryNumber} ${
+    isExercise ? "Exercise" : "Food"
+  } Name</label>
+      <input type="text" id="${type}-${entryNumber}-name" placeholder="${
+    isExercise ? "Exercise (e.g., running)" : "Food (e.g., chicken)"
+  }" name="food-name" />
+      ${
+        isExercise
+          ? `<label for="${type}-${entryNumber}-duration">Duration (minutes)</label>
+             <input type="number" id="${type}-${entryNumber}-duration" placeholder="Duration (min)" min="1" value="30" name="duration" />`
+          : ""
+      }
+      <label for="${type}-${entryNumber}-calories">Calories</label>
+      <input type="number" id="${type}-${entryNumber}-calories" placeholder="Calories" name="calories" readonly />
+    </div>`;
 }
 
-// Calculates total calories and updates the output
-function calculateCalories(e) {
-    e.preventDefault();
-    isError = false;
+// Autofill calories for food or exercise
+async function autoFillCalories(foodInput, calorieInput, isExercise = false) {
+  const entryName = foodInput.value.trim().toLowerCase();
 
-    const breakfastCalories = getCaloriesFromInputs('#breakfast input[type=number]');
-    const lunchCalories = getCaloriesFromInputs('#lunch input[type=number]');
-    const dinnerCalories = getCaloriesFromInputs('#dinner input[type=number]');
-    const snacksCalories = getCaloriesFromInputs('#snacks input[type=number]');
-    const exerciseCalories = getCaloriesFromInputs('#exercise input[type=number]');
-    const budgetCalories = getCaloriesFromInputs([budgetNumberInput]);
+  if (!entryName) {
+    calorieInput.value = ""; // Clear calories if no input
+    return;
+  }
 
-    if (isError || budgetCalories === 0) {
-        output.innerHTML = "<p class='text-danger'>Please enter valid inputs!</p>";
-        return;
-    }
+  if (isExercise) {
+    const durationInput = calorieInput.parentElement.querySelector('input[name="duration"]');
+    const duration = parseInt(durationInput?.value) || 30; // Default to 30 minutes
 
-    const consumedCalories = breakfastCalories + lunchCalories + dinnerCalories + snacksCalories;
-    const remainingCalories = budgetCalories - consumedCalories + exerciseCalories;
-    const surplusOrDeficit = remainingCalories >= 0 ? "Surplus" : "Deficit";
-
-    displayResults(budgetCalories, consumedCalories, exerciseCalories, remainingCalories, surplusOrDeficit);
-}
-
-// Extracts calories from input fields and validates
-function getCaloriesFromInputs(selectorOrInputs) {
-    let inputs = Array.isArray(selectorOrInputs) ? selectorOrInputs : document.querySelectorAll(selectorOrInputs);
-    let totalCalories = 0;
-
-    for (let input of inputs) {
-        let value = input.value.trim();
-        if (value === "" || isNaN(value)) {
-            alert("Invalid or empty input. Please correct the fields.");
-            isError = true;
-            return 0;
+    try {
+      const response = await fetch(
+        `https://api.api-ninjas.com/v1/caloriesburned?activity=${entryName}&duration=${duration}`,
+        {
+          method: "GET",
+          headers: {
+            "X-Api-Key": API_NINJAS_API_KEY,
+          },
         }
-        totalCalories += Number(value);
+      );
+
+      const data = await response.json();
+      if (data.length > 0) {
+        calorieInput.value = data[0].total_calories || "Not Found";
+      } else {
+        calorieInput.value = "Not Found";
+      }
+    } catch (error) {
+      console.error("Error fetching exercise calorie data:", error);
+      calorieInput.value = "Error";
     }
-    return totalCalories;
+  } else {
+    // Fetch food calorie data from Edamam
+    try {
+      const endpoint = `https://api.edamam.com/api/food-database/v2/parser?app_id=${EDAMAM_APP_ID}&app_key=${EDAMAM_APP_KEY}&ingr=${entryName}`;
+      const response = await fetch(endpoint);
+      const data = await response.json();
+      const calories = data.hints[0]?.food?.nutrients?.ENERC_KCAL || 0;
+      calorieInput.value = calories.toFixed(2);
+    } catch (error) {
+      console.error("Error fetching food calorie data:", error);
+      calorieInput.value = "Error";
+    }
+  }
 }
 
-// Displays calculated results
-function displayResults(budget, consumed, burned, remaining, status) {
-    output.innerHTML = `
-        <div class="alert alert-${status === "Surplus" ? "success" : "danger"}">
-            <strong>${Math.abs(remaining)} Calorie ${status}</strong>
-        </div>
-        <p>Budget: ${budget} Calories</p>
-        <p>Consumed: ${consumed} Calories</p>
-        <p>Burned: ${burned} Calories</p>`;
-    output.classList.remove("hide");
+// Calculate total calorie budget and display results
+function calculateCalorieBudget(event) {
+  event.preventDefault();
+  const budget = parseInt(budgetNumberInput.value);
+  if (!budget) {
+    alert("Please enter a valid daily calorie budget.");
+    return;
+  }
+
+  let totalCalories = 0;
+  let totalBurned = 0;
+
+  // Sum up all food and exercise calories
+  document.querySelectorAll(".entry-group").forEach((entry) => {
+    const calories = parseInt(entry.querySelector('input[name="calories"]').value) || 0;
+
+    if (entry.closest("fieldset").id === "exercise") {
+      totalBurned += calories;
+    } else {
+      totalCalories += calories;
+    }
+  });
+
+  const netCalories = totalCalories - totalBurned;
+  const remainingCalories = budget - netCalories;
+
+  // Display results
+  output.classList.remove("hide");
+  output.innerHTML = `
+    <div>
+      <p><strong>${Math.abs(remainingCalories)} Calorie ${
+    remainingCalories > 0 ? "Surplus" : "Deficit"
+  }</strong></p>
+      <p><strong>Budget:</strong> ${budget} Calories</p>
+      <p><strong>Consumed:</strong> ${totalCalories} Calories</p>
+      <p><strong>Burned:</strong> ${totalBurned} Calories</p>
+    </div>`;
+}
+
+// Clear all entries and reset the form
+function clearAll() {
+  calorieCounter.reset();
+  document.querySelectorAll(".input-container").forEach((container) => (container.innerHTML = ""));
+  output.classList.add("hide");
 }
 
 // Event Listeners
 addEntryButton.addEventListener("click", addEntry);
-calorieCounter.addEventListener("submit", calculateCalories);
-clearButton.addEventListener("click", clearForm);
+calorieCounter.addEventListener("submit", calculateCalorieBudget);
+clearButton.addEventListener("click", clearAll);
